@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>JSDemo</title>
+	<meta http-equiv="Content-Type" content="text/html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no">
+    <meta charset="utf-8">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta content="JSDemo" name="keywords"/>
+    <meta name="description" content="JSDemo">
+    <meta  name="applicable-device"  content="mobile">
+    <script type="text/javascript">
+        document.getElementsByTagName("html")[0].style.fontSize = (document.width?document.width:document.documentElement.clientWidth)*0.0375+"px";
+    </script>
+    <style>
+        button{padding: 5%;margin: 1rem;font-size: 1.2rem;word-wrap: break-word;max-width: 90%;}
+    </style>
+</head>
+<body>
+    <button>testApp.getToken()</button><br />
+</body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script>
+if(navigator.userAgent.toLowerCase().indexOf("iphone")>-1){
+    var testApp = {};
+}
+var myData;
+    $(function(){
+        testApp.callback = function(x,y){
+            alert("callback："+ x+" "+y)
+        }
+        $("button").click(function(){
+            if(navigator.userAgent.toLowerCase().indexOf("iphone")>-1){
+                // eval("webkit.messageHandlers."+$(this).text());
+                var text = $(this).text();
+                var data = {methodName: text.match(/\.(.+)\(/)[1]};
+                var p;
+                if((p = text.match(/\'(.+)\'/))!=null){
+                   eval("myData="+p[1]);
+                     data.params = myData;
+                }
+                webkit.messageHandlers.testApp.postMessage(data)
+            }else{
+                eval($(this).text());
+            }
+        })
+    })
+</script>
+</html>

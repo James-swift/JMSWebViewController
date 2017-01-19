@@ -1,0 +1,13 @@
+/* 
+  JMSWebViewController.strings
+  JMSWebViewController
+
+  Created by devedbox on 2016/12/17.
+  Copyright © 2016年 James. All rights reserved.
+*/
+"back"      = "Back";
+"close"     = "Close";
+"messages"  = "Messages from web page";
+"cancel"    = "Cancel";
+"confirm"   = "Confirm";
+"input"     = "Please input text content";

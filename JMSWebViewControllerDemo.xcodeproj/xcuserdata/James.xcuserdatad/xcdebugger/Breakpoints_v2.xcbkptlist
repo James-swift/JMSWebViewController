@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JMSWebViewController/JMSWebViewController/JMSWebView/JMSExtUINavigationController.swift"
+            timestampString = "506240461.803688"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "15"
+            endingLineNumber = "15"
+            landmarkName = "navigationBar(_:shouldPop:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(extension in JMSWebViewController):__ObjC.UINavigationController.navigationBar (__ObjC.UINavigationBar, shouldPop : __ObjC.UINavigationItem) -&gt; Swift.Bool"
+                  moduleName = "JMSWebViewController"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/James/Git/James/Swift/JMSWebViewControllerDemo/JMSWebViewController/JMSWebViewController/JMSWebView/JMSExtUINavigationController.swift"
+                  timestampString = "506240462.016003"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "15"
+                  endingLineNumber = "15"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(extension in JMSWebViewController):__ObjC.UINavigationController.navigationBar (__ObjC.UINavigationBar, shouldPop : __ObjC.UINavigationItem) -&gt; Swift.Bool"
+                  moduleName = "JMSWebViewController"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/James/Git/James/Swift/JMSWebViewControllerDemo/JMSWebViewController/JMSWebViewController/JMSWebView/JMSExtUINavigationController.swift"
+                  timestampString = "506240462.017873"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "15"
+                  endingLineNumber = "15"
+                  offsetFromSymbolStart = "2269">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JMSWebViewController/JMSWebViewController/JMSWebView/JMSWebViewController.swift"
+            timestampString = "506503134.417661"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
+            landmarkName = "setupCloseBtn(isHiddenCloseBtn:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JMSWebViewControllerDemo/JMSWebView/JMSWebViewUtils.swift"
+            timestampString = "506509754.920322"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "32"
+            endingLineNumber = "32"
+            landmarkName = "getLocalizedString(key:value:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
