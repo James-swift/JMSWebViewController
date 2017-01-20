@@ -102,11 +102,11 @@
 		1A073BBA1E30C06E002BF9CC /* JMSWebViewController */ = {
 			isa = PBXGroup;
 			children = (
+				1A073BBE1E30C06E002BF9CC /* JMSWebViewController.swift */,
 				1A073BBB1E30C06E002BF9CC /* JMSWebExtUIButton.swift */,
 				1A073BBC1E30C06E002BF9CC /* JMSWebExtUIImage.swift */,
-				1A073BBD1E30C06E002BF9CC /* JMSWebViewController.bundle */,
-				1A073BBE1E30C06E002BF9CC /* JMSWebViewController.swift */,
 				1A073BBF1E30C06E002BF9CC /* JMSWebViewUtils.swift */,
+				1A073BBD1E30C06E002BF9CC /* JMSWebViewController.bundle */,
 			);
 			path = JMSWebViewController;
 			sourceTree = SOURCE_ROOT;

@@ -26,19 +26,6 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         return tempWebView
     }()
     
-    private(set) var backgroundLabel: UILabel = {
-        let tempLabel = UILabel()
-        tempLabel.textColor = UIColor.init(colorLiteralRed: 0.332, green: 0.322, blue: 0.322, alpha: 1.0)
-        tempLabel.font      = UIFont.systemFont(ofSize: 12.0)
-        tempLabel.numberOfLines = 0
-        tempLabel.textAlignment = .center
-        tempLabel.backgroundColor = .clear
-        tempLabel.translatesAutoresizingMaskIntoConstraints = false
-        tempLabel.setContentCompressionResistancePriority(UILayoutPriorityRequired, for: .vertical)
-        
-        return tempLabel
-    }()
-    
     private(set) var progressView: UIProgressView?
     
     private var reqPath: String         = ""
