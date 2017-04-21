@@ -19,9 +19,9 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         let tempConfiguration           = WKWebViewConfiguration()
         tempConfiguration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
-        let tempWebView                        = WKWebView.init(frame: .zero, configuration: tempConfiguration)
+        let tempWebView                 = WKWebView.init(frame: .zero, configuration: tempConfiguration)
         tempWebView.allowsBackForwardNavigationGestures = false
-        tempWebView.backgroundColor        = .clear
+        tempWebView.backgroundColor     = .clear
         
         return tempWebView
     }()
