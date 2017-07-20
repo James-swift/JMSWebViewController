@@ -13,15 +13,15 @@ private let kWebViewEstimatedProgress   =  "estimatedProgress"
 private let kWebViewTitle               =  "title"
 private let backTitle: String           = JMSWebViewUtils.getLocalizedString(key: "back")
 
-open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, UIGestureRecognizerDelegate {
+open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    private(set) var webView: WKWebView = {
+    private(set) lazy var webView: WKWebView = {
         let tempConfiguration           = WKWebViewConfiguration()
         tempConfiguration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
         let tempWebView                 = WKWebView.init(frame: .zero, configuration: tempConfiguration)
-        tempWebView.allowsBackForwardNavigationGestures = false
-        tempWebView.backgroundColor     = .clear
+        tempWebView.allowsBackForwardNavigationGestures = true
+        tempWebView.backgroundColor     = .white
         
         return tempWebView
     }()
@@ -34,12 +34,12 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
     /**
         The name of the message processing array
      */
-    private var scriptMsgNames: Array<String>   = []
+    fileprivate var scriptMsgNames: Array<String>   = []
     
     /**
         The name of the message processing block
      */
-    public  var scriptDidReceiveMsgBlk: ((_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
+    public var scriptDidReceiveMsgBlk: ((_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
     
     private(set) var backBarButton: UIBarButtonItem = {
         let tempBarBtn      = UIBarButtonItem.init()
@@ -61,6 +61,11 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
 
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+
+        self.addScriptMsgNames()
+        
         self.navigationController?.isNavigationBarHidden = self.isNavBarHidden
         self.closeBtn?.isHidden = false
         
@@ -68,8 +73,17 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.webView.addObserver(self, forKeyPath: kWebViewTitle, options: .new, context: nil)
     }
     
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
+
+        self.removeScriptMsgNames()
+        
         self.navigationController?.isNavigationBarHidden = false
         self.closeBtn?.isHidden = true
         
@@ -90,6 +104,19 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
+        
+        self.webView.uiDelegate = nil
+        self.webView.navigationDelegate = nil
+        
+        if self.webView.isLoading {
+            self.webView.stopLoading()
+        }
+        
+        self.progressView?.removeFromSuperview()
     }
     
     //  MARK: Initialization
@@ -126,6 +153,8 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.view.backgroundColor           = .white
         self.edgesForExtendedLayout         = UIRectEdge()
         
+//        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+
         self.webView.navigationDelegate     = self
         self.webView.uiDelegate             = self
         self.view.addSubview(self.webView)
@@ -134,8 +163,6 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.webView.setNeedsUpdateConstraints()
         self.webView.updateConstraints()
         
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
-            
         if !self.isNavBarHidden {
             progressView = UIProgressView.init(progressViewStyle: .bar)
             progressView!.frame = CGRect.init(x: 0, y: 64 - progressView!.bounds.size.height, width: self.view.bounds.size.width, height: progressView!.bounds.size.height)
@@ -158,7 +185,12 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.view.addConstraints([leftConstraint, rightConstraint, topConstraint, bottomConstraint])
     }
     
-    private func setupCloseBtn(isHiddenCloseBtn: Bool = true) {
+    fileprivate func setupCloseBtn() {
+        var isHiddenCloseBtn = true
+        if webView.canGoBack {
+            isHiddenCloseBtn = false
+        }
+        
         let customView = UIView.init(frame: .init(x: 0, y: 0, width: isHiddenCloseBtn ? backSizeW : (backSizeW + closeSizeW), height: 44))
 
         let backBtn    = UIButton.jms_web_backButton(frame: .init(x: 0, y: 0, width: backSizeW, height: 44), imageColor: backTintColor, title: backTitle, titleColor: backTitleColor, target: self, action: #selector(clickBackBtn), for: .touchUpInside)
@@ -179,22 +211,22 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
             return
         }
         
-        for item in scriptMsgNames {
-            self.webView.configuration.userContentController.add(self, name: item)
-        }
-        
         let tempUrl = URL.init(string: self.reqPath)!
         if tempUrl.host != nil && tempUrl.scheme != nil {
             self.webView.load(URLRequest.init(url: tempUrl))
         }else {
-            self.webView.load(URLRequest.init(url: URL.init(fileURLWithPath: self.reqPath)))
+            let tempFileURL = URL.init(fileURLWithPath: self.reqPath)
+            if #available(iOS 9.0, *) {
+                self.webView.loadFileURL(tempFileURL, allowingReadAccessTo: tempFileURL)
+            } else {
+                self.webView.load(URLRequest.init(url: URL.init(fileURLWithPath: self.reqPath)))
+            }
         }
     }
     
     // MARK: - Event Response
     func clickBackBtn() {
         if self.webView.canGoBack {
-            self.setupCloseBtn(isHiddenCloseBtn: false)
             self.webView.goBack()
         }else {
             self.close()
@@ -205,47 +237,16 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         _ = self.navigationController?.popViewController(animated: true)
     }
     
-    deinit {
-        if self.webView.isLoading {
-            self.webView.stopLoading()
-        }
-        
-        self.progressView?.removeFromSuperview()
-    }
-    
     // MARK: - Private
-    private func didStartLoad() {
-        self.progressView?.progress = 0
-        self.progressView?.isHidden = false
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-    }
-    
-    private func didFinishLoad() {
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-    
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.3) {
-            self.progressView?.isHidden = true
+    private func addScriptMsgNames() {
+        for name in self.scriptMsgNames {
+            self.webView.configuration.userContentController.add(self, name: name)
         }
     }
     
-    private func didFailProvisionalNavigation() {
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-
-        self.progressView?.isHidden = true
-        self.progressView?.progress = 0
-    }
-    
-    private func didFailNavigation() {
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-
-        self.progressView?.isHidden = true
-        self.progressView?.progress = 0
-    }
-    
-    // MARK: - WKScriptMessageHandler
-    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if self.scriptDidReceiveMsgBlk != nil && self.scriptMsgNames.contains(message.name) {
-            self.scriptDidReceiveMsgBlk!(userContentController, message)
+    private func removeScriptMsgNames() {
+        for name in self.scriptMsgNames {
+            self.webView.configuration.userContentController.removeScriptMessageHandler(forName: name)
         }
     }
     
@@ -258,8 +259,35 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         }
     }
     
-    // MARK: - WKNavigationDelegate
+    // MARK: - UIGestureRecognizerDelegate
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let count = self.navigationController?.viewControllers.count ?? 0
+        
+        if count <= 1 {
+            return false
+        }
+        
+        return true
+    }
+
+}
+
+// MARK: - WKScriptMessageHandler
+extension JMSWebViewController: WKScriptMessageHandler {
+    
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if self.scriptDidReceiveMsgBlk != nil && self.scriptMsgNames.contains(message.name) {
+            self.scriptDidReceiveMsgBlk!(userContentController, message)
+        }
+    }
+    
+}
+
+// MARK: - WKNavigationDelegate
+extension JMSWebViewController: WKNavigationDelegate {
+    
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        self.setupCloseBtn()
         decisionHandler(.allow)
     }
     
@@ -269,6 +297,7 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         self.didFinishLoad()
+        self.setupCloseBtn()
     }
     
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -279,10 +308,46 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.didFailNavigation()
     }
     
-    // MARK: - WKUIDelegate
+    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        
+    }
+    
+    fileprivate func didStartLoad() {
+        self.progressView?.progress = 0
+        self.progressView?.isHidden = false
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+    }
+    
+    fileprivate func didFinishLoad() {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.3) {
+            self.progressView?.isHidden = true
+        }
+    }
+    
+    fileprivate func didFailProvisionalNavigation() {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        
+        self.progressView?.isHidden = true
+        self.progressView?.progress = 0
+    }
+    
+    fileprivate func didFailNavigation() {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        
+        self.progressView?.isHidden = true
+        self.progressView?.progress = 0
+    }
+
+}
+
+// MARK: - WKUIDelegate
+extension JMSWebViewController: WKUIDelegate {
+    
     public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         let host = webView.url?.host
-
+        
         let alert = UIAlertController(title: host ?? JMSWebViewUtils.getLocalizedString(key: "messages"), message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: JMSWebViewUtils.getLocalizedString(key: "confirm"), style: .default, handler: { (_) -> Void in
             // We must call back js
@@ -295,7 +360,7 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         let host = webView.url?.host
-
+        
         let alert = UIAlertController(title: host ?? JMSWebViewUtils.getLocalizedString(key: "messages"), message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: JMSWebViewUtils.getLocalizedString(key: "cancel"), style: .cancel, handler: { (_) -> Void in
             completionHandler(false)
@@ -304,13 +369,13 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
             alert.dismiss(animated: true, completion: nil)
             completionHandler(true)
         }))
-
+        
         self.present(alert, animated: true, completion: nil)
     }
     
     public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         let host = webView.url?.host
-
+        
         let alert = UIAlertController(title: prompt, message: host ?? defaultText, preferredStyle: .alert)
         
         alert.addTextField { (textField: UITextField) -> Void in
@@ -329,18 +394,4 @@ open class JMSWebViewController: UIViewController, WKNavigationDelegate, WKUIDel
         self.present(alert, animated: true, completion: nil)
     }
     
-    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        
-    }
-    
-    // MARK: - UIGestureRecognizerDelegate
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        let count = self.navigationController?.viewControllers.count ?? 0
-        if count <= 1 {
-            return false
-        }
-        
-        return true
-    }
-
 }

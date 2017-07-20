@@ -66,12 +66,12 @@ class ViewController: UIViewController {
         }else {
             let path = Bundle.main.path(forResource: "js_api_test.html", ofType: nil)!
             let webVC = JMSWebViewController.init(reqPath: path, scriptMsgNames: ["testApp"])
-            webVC.scriptDidReceiveMsgBlk = { (userContentController, message) in
+            webVC.scriptDidReceiveMsgBlk = { [weak self] (userContentController, message) in
                 let dict = message.body as? Dictionary<String, Any>
                 let methodName = dict?["methodName"] as? String ?? ""
                 if methodName == "getToken" {
                     let newVC = ViewController()
-                    self.navigationController?.pushViewController(newVC, animated: true)
+                    self?.navigationController?.pushViewController(newVC, animated: true)
                 }
             }
             self.navigationController?.pushViewController(webVC, animated: true)
