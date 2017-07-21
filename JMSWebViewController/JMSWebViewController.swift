@@ -35,7 +35,9 @@ open class JMSWebViewController: UIViewController {
     public var reqErrorBlk: ((_ webView: WKWebView, _ reqPath: String, _ error: Error?)->())?
     /// 自定义导航栏titleView
     public var cstNavTitleViewBlk: ((_ webView: WKWebView, _ title: String?)->(UIView?))?
-    
+    /// 给webView添加约束
+    public var addWebViewConstraintsBlk: ((_ webView: WKWebView, _ webSuperView: UIView)->())?
+
     fileprivate var reqPath: String                 = ""
     fileprivate var  isNavBarHidden                 = false
     fileprivate var scriptMsgNames: Array<String>   = []
@@ -210,17 +212,22 @@ open class JMSWebViewController: UIViewController {
             self.navigationController?.view.addSubview(progressView!)
         }
         
+        self.addWebViewConstraintsBlk?(self.webView, self.view)
+        
         self.setupCloseBtn(true)
     }
     
     open override func updateViewConstraints() {
         super.updateViewConstraints()
-        let leftConstraint = NSLayoutConstraint(item: self.webView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0)
-        let rightConstraint = NSLayoutConstraint(item: self.webView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
-        let topConstraint =  NSLayoutConstraint(item: self.webView, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 0)
-        let bottomConstraint =  NSLayoutConstraint(item: self.webView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0)
         
-        self.view.addConstraints([leftConstraint, rightConstraint, topConstraint, bottomConstraint])
+        if self.addWebViewConstraintsBlk == nil {
+            let leftConstraint = NSLayoutConstraint(item: self.webView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: self.webView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
+            let topConstraint =  NSLayoutConstraint(item: self.webView, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 0)
+            let bottomConstraint =  NSLayoutConstraint(item: self.webView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0)
+            
+            self.view.addConstraints([leftConstraint, rightConstraint, topConstraint, bottomConstraint])
+        }
     }
     
     fileprivate func setupCloseBtn(_ isFirstLoad: Bool = false) {
