@@ -1,0 +1,6 @@
+framework module Pods_JMSWebViewControllerDemo {
+  umbrella header "Pods-JMSWebViewControllerDemo-umbrella.h"
+
+  export *
+  module * { export * }
+}

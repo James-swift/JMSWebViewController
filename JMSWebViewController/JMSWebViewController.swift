@@ -8,14 +8,53 @@
 
 import UIKit
 import WebKit
+import JMSNavBackButtonHandler
 
-private let kWebViewEstimatedProgress   =  "estimatedProgress"
-private let kWebViewTitle               =  "title"
-private let backTitle: String           = JMSWebViewUtils.getLocalizedString(key: "back")
+private let kWebViewEstimatedProgress           =  "estimatedProgress"
+private let kWebViewTitle                       =  "title"
 
-open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
+private let kStatusBarHeight: CGFloat           = 20.0
+private let kNavBarHeight: CGFloat              = 44.0
+private let kStatusAndNavBarHeight: CGFloat     = 64.0
+
+public enum JMSWebViewBackPositionAt {
+    case backBarBtnItem(backIconImage: UIImage?, backTintColor: UIColor?, closeTitleColor: UIColor, closeIconColor: UIColor?, navTitleFont: UIFont, navTitleColor: UIColor)      /// 返回按钮添加到导航栏backBarButtonItem（默认）
+    case leftBarBtnItem(backTintColor: UIColor, closeTitleColor: UIColor, closeIconColor: UIColor?)      /// 返回按钮添加到导航栏leftBarButtonItem
+}
+
+open class JMSWebViewController: UIViewController {
     
-    private(set) lazy var webView: WKWebView = {
+    public var viewWillAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    public var viewDidAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    public var viewWillDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    public var viewDidDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+
+    /// 收到消息处理
+    public var scriptDidReceiveMsgBlk: ((_ webView: WKWebView, _ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
+    /// 请求路径错误处理
+    public var reqErrorBlk: ((_ webView: WKWebView, _ reqPath: String, _ error: Error?)->())?
+    /// 自定义导航栏titleView
+    public var cstNavTitleViewBlk: ((_ webView: WKWebView, _ title: String?)->(UIView?))?
+    
+    fileprivate var reqPath: String                 = ""
+    fileprivate var  isNavBarHidden                 = false
+    fileprivate var scriptMsgNames: Array<String>   = []
+    fileprivate var positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: .clear, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black)
+
+    /// 唯一标识
+    private(set) var pageId: String           = ""
+
+    private(set) var backTitleColor: UIColor  = .black
+    private(set) var backTitle: String        = JMSWebViewUtils.getLocalizedString(key: "back")
+    
+    private      var closeTitle: String       = JMSWebViewUtils.getLocalizedString(key: "close")
+    private      var closeBtnOffX: CGFloat    = 0
+    private(set) var closeBtn: UIButton?
+    
+    private      var backSizeW: CGFloat       = 0
+    private      var closeSizeW: CGFloat      = 0
+    
+    fileprivate lazy var webView: WKWebView = {
         let tempConfiguration           = WKWebViewConfiguration()
         tempConfiguration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
@@ -26,74 +65,50 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
         return tempWebView
     }()
     
-    private(set) var progressView: UIProgressView?
-    
-    private var reqPath: String         = ""
-    private var  isNavBarHidden         = true
-    
-    /**
-        The name of the message processing array
-     */
-    fileprivate var scriptMsgNames: Array<String>   = []
-    
-    /**
-        The name of the message processing block
-     */
-    public var scriptDidReceiveMsgBlk: ((_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
-    
-    private(set) var backBarButton: UIBarButtonItem = {
-        let tempBarBtn      = UIBarButtonItem.init()
-        tempBarBtn.title    = backTitle
-        
-        return tempBarBtn
-    }()
-    
-    private(set) var backTitleColor: UIColor  = .black
-    private(set) var backTintColor: UIColor   = .black
-    private      var closeTitle: String       = JMSWebViewUtils.getLocalizedString(key: "close")
-    private(set) var closeIconColor: UIColor  = .clear
-    private(set) var closeTitleColor: UIColor = .black
-    private(set) var closeBtn: UIButton?
-    private var cacheCloseHidden: Bool        = false
-    
-    private      var backSizeW                = 34
-    private      var closeSizeW               = 34
+    fileprivate var progressView: UIProgressView?
+    private(set) var progressTintColor: UIColor = .clear
 
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
-
         self.addScriptMsgNames()
         
         self.navigationController?.isNavigationBarHidden = self.isNavBarHidden
         self.closeBtn?.isHidden = false
-        
+        self.progressView?.isHidden = false
+
         self.webView.addObserver(self, forKeyPath: kWebViewEstimatedProgress, options: .new, context: nil)
         self.webView.addObserver(self, forKeyPath: kWebViewTitle, options: .new, context: nil)
+        
+        self.viewWillAppearBlk?(self.pageId, self.webView)
     }
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        self.viewDidAppearBlk?(self.pageId, self.webView)
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
-
         self.removeScriptMsgNames()
         
         self.navigationController?.isNavigationBarHidden = false
         self.closeBtn?.isHidden = true
+        self.progressView?.isHidden = true
         
         self.webView.removeObserver(self, forKeyPath: kWebViewEstimatedProgress)
         self.webView.removeObserver(self, forKeyPath: kWebViewTitle)
+        
+        self.viewWillDisappearBlk?(self.pageId, self.webView)
     }
     
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        
+        self.viewDidDisappearBlk?(self.pageId, self.webView)
     }
     
     override open func viewDidLoad() {
@@ -107,44 +122,69 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     deinit {
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
-        
         self.webView.uiDelegate = nil
         self.webView.navigationDelegate = nil
+        self.backDelegate   = nil
         
         if self.webView.isLoading {
             self.webView.stopLoading()
         }
         
+        self.closeBtn?.removeFromSuperview()
+        self.closeBtn = nil
         self.progressView?.removeFromSuperview()
     }
     
     //  MARK: Initialization
     /// Initialization
     ///
-    ///     let webViewVC =  JMSWebViewController.init(reqPath: path, scriptMsgNames: [], backTintColor: .red, closeTitleColor: .red)
+    ///     let webViewVC = JMSWebViewController.init(isNavBarHidden: false, positionAt: .leftBarBtnItem(backTintColor: .black, closeTitleColor: .black, closeIconColor: nil), progressTintColor: .black, reqPath: path, scriptMsgNames: ["testApp"])
     ///
     /// - Parameters:
-    ///     - isNavBarHidden: Whether to hide the navigation bar
-    ///     - reqPath: Request path
-    ///     - scriptMsgNames: The name of the message processing array
-    ///     - backTintColor: Back views Color
-    ///     - closeTitleColor: Close title Color
-    ///     - closeIconColor: Close icon Color
-    public init(isNavBarHidden: Bool = false, reqPath: String, scriptMsgNames: Array<String> = [], backTintColor: UIColor = UIColor.black, closeTitleColor: UIColor = UIColor.black, closeIconColor: UIColor = .clear) {
-        self.reqPath         = reqPath
-        self.isNavBarHidden  = isNavBarHidden
-        self.scriptMsgNames  = scriptMsgNames
-        self.backTintColor   = backTintColor
-        self.closeTitleColor = closeTitleColor
-        self.closeIconColor  = closeIconColor
-        if closeIconColor == .clear {
-            backSizeW       = 50
-            closeSizeW      = 44
-        }else {
-            closeTitle      = ""
-            backTitleColor  = .clear
+    ///     - positionAt:        返回按钮位置
+    ///     - isNavBarHidden:    是否隐藏导航栏
+    ///     - progressTintColor: ProgressView的tintColor属性设置
+    ///     - reqPath:           请求路径
+    ///     - scriptMsgNames:    消息处理数组
+    public init(positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: .clear, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: Bool = false, pageId: String = "", progressTintColor: UIColor = .clear, reqPath: String, scriptMsgNames: Array<String> = []) {
+        self.pageId             = pageId
+        self.reqPath            = reqPath
+        self.isNavBarHidden     = isNavBarHidden
+        self.scriptMsgNames     = scriptMsgNames
+        self.positionAt         = positionAt
+        self.progressTintColor  = progressTintColor
+        
+        switch positionAt {
+        case .backBarBtnItem( _, _, _, let closeIconColor, _, _):
+            if closeIconColor == nil || closeIconColor == .clear {
+                self.backSizeW          = 50
+                self.closeSizeW         = 50
+                self.closeBtnOffX       = self.backSizeW + 10
+            }else {
+                self.backSizeW          = 34
+                self.closeSizeW         = 34
+                
+                self.closeTitle         = ""
+                self.backTitleColor     = .clear
+                self.backTitle          = ""
+                self.closeBtnOffX       = self.backSizeW + 2
+            }
+        case .leftBarBtnItem( _, _, let closeIconColor):
+            if closeIconColor == nil || closeIconColor == .clear {
+                self.backSizeW          = 50
+                self.closeSizeW         = 50
+                self.closeBtnOffX       = self.backSizeW
+            }else {
+                self.backSizeW          = 30
+                self.closeSizeW         = 34
+                
+                self.closeTitle         = ""
+                self.backTitleColor     = .clear
+                self.backTitle          = ""
+                self.closeBtnOffX       = self.backSizeW
+            }
         }
+
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -153,8 +193,6 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.backgroundColor           = .white
         self.edgesForExtendedLayout         = UIRectEdge()
         
-//        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
-
         self.webView.navigationDelegate     = self
         self.webView.uiDelegate             = self
         self.view.addSubview(self.webView)
@@ -165,14 +203,14 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
         
         if !self.isNavBarHidden {
             progressView = UIProgressView.init(progressViewStyle: .bar)
-            progressView!.frame = CGRect.init(x: 0, y: 64 - progressView!.bounds.size.height, width: self.view.bounds.size.width, height: progressView!.bounds.size.height)
+            progressView!.frame = CGRect.init(x: 0, y: kStatusAndNavBarHeight - progressView!.bounds.size.height, width: self.view.bounds.size.width, height: progressView!.bounds.size.height)
             progressView?.isHidden          = true
-            progressView!.progressTintColor = backTintColor
+            progressView!.progressTintColor = progressTintColor
             progressView?.trackTintColor    = .clear
             self.navigationController?.view.addSubview(progressView!)
         }
         
-        self.setupCloseBtn()
+        self.setupCloseBtn(true)
     }
     
     open override func updateViewConstraints() {
@@ -185,29 +223,58 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.addConstraints([leftConstraint, rightConstraint, topConstraint, bottomConstraint])
     }
     
-    fileprivate func setupCloseBtn() {
+    fileprivate func setupCloseBtn(_ isFirstLoad: Bool = false) {
+        if self.isNavBarHidden {
+            return
+        }
+        
         var isHiddenCloseBtn = true
         if webView.canGoBack {
             isHiddenCloseBtn = false
         }
         
-        let customView = UIView.init(frame: .init(x: 0, y: 0, width: isHiddenCloseBtn ? backSizeW : (backSizeW + closeSizeW), height: 44))
+        switch self.positionAt {
+        case .leftBarBtnItem(let backTintColor, let closeTitleColor, let closeIconColor):
+            let customView = UIView.init(frame: .init(x: 0, y: 0, width: isHiddenCloseBtn ? backSizeW : (closeBtnOffX + closeSizeW), height: kNavBarHeight))
+            
+            let backBtn    = UIButton.jms_web_backButton(frame: .init(x: 0, y: 0, width: backSizeW, height: kNavBarHeight), imageColor: backTintColor, title: self.backTitle, titleColor: backTitleColor, target: self, action: #selector(clickBackBtn), for: .touchUpInside)
+            customView.addSubview(backBtn)
+            
+            if !isHiddenCloseBtn {
+                self.closeBtn = UIButton.jms_web_closeButton(frame: .init(x: closeBtnOffX, y: 0, width: closeSizeW, height: kNavBarHeight), imageColor: closeIconColor ?? .clear, title: closeTitle, titleColor: closeTitleColor, target: self, action: #selector(close), for: .touchUpInside)
+                customView.addSubview(self.closeBtn!)
+            }
+            
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: customView)
+        case .backBarBtnItem(let backIconImage, let backTintColor, let closeTitleColor, let closeIconColor, _, _):
+            //主要是以下两个图片设置
+            if isFirstLoad {
+                self.backDelegate = self
 
-        let backBtn    = UIButton.jms_web_backButton(frame: .init(x: 0, y: 0, width: backSizeW, height: 44), imageColor: backTintColor, title: backTitle, titleColor: backTitleColor, target: self, action: #selector(clickBackBtn), for: .touchUpInside)
-        customView.addSubview(backBtn)
-        
-        if !isHiddenCloseBtn {
-            self.closeBtn = UIButton.jms_web_closeButton(frame: .init(x: backSizeW, y: 0, width: closeSizeW, height: 44), imageColor: closeIconColor, title: closeTitle, titleColor: closeTitleColor, target: self, action: #selector(close), for: .touchUpInside)
-            customView.addSubview(self.closeBtn!)
+                navigationController?.navigationBar.tintColor = backTintColor
+
+                navigationController?.navigationBar.backIndicatorImage = backIconImage
+                navigationController?.navigationBar.backIndicatorTransitionMaskImage = backIconImage
+                
+                let backItem = UIBarButtonItem()
+                backItem.title = self.backTitle
+                self.navigationController?.navigationBar.topItem?.backBarButtonItem = backItem
+            }
+            
+            self.closeBtn?.removeFromSuperview()
+
+            if !isHiddenCloseBtn {
+                self.closeBtn = UIButton.jms_web_closeButton(frame: .init(x: self.closeBtnOffX, y: kStatusBarHeight, width: self.closeSizeW, height: kNavBarHeight), imageColor: closeIconColor ?? .clear, title: closeTitle, titleColor: closeTitleColor, target: self, action: #selector(close), for: .touchUpInside)
+                self.navigationController?.view.addSubview(self.closeBtn!)
+            }
         }
         
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: customView)
     }
     
     // MARK: - Datas
     private func fillDatas() {
-        if self.isNavBarHidden && self.reqPath == "" {
-            _ = self.navigationController?.popViewController(animated: true)
+        if self.reqPath == "" {
+            self.reqErrorBlk?(self.webView,self.reqPath, nil)
             return
         }
         
@@ -237,39 +304,67 @@ open class JMSWebViewController: UIViewController, UIGestureRecognizerDelegate {
         _ = self.navigationController?.popViewController(animated: true)
     }
     
-    // MARK: - Private
-    private func addScriptMsgNames() {
-        for name in self.scriptMsgNames {
-            self.webView.configuration.userContentController.add(self, name: name)
-        }
-    }
-    
-    private func removeScriptMsgNames() {
-        for name in self.scriptMsgNames {
-            self.webView.configuration.userContentController.removeScriptMessageHandler(forName: name)
-        }
-    }
-    
     // MARK: - Observer
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == kWebViewEstimatedProgress {
             self.progressView?.progress = Float(self.webView.estimatedProgress)
         }else if keyPath == kWebViewTitle {
-            self.title = webView.title
+            if self.cstNavTitleViewBlk != nil {
+                self.navigationItem.titleView = self.cstNavTitleViewBlk!(self.webView, self.webView.title)
+            }else {
+                switch self.positionAt {
+                case .backBarBtnItem(_, _, _, _, let navTitleFont, let navTitleColor):
+                    self.jms_setupNavTitle(webView.title ?? "", textColor: navTitleColor, titleFont: navTitleFont, offX: (self.closeBtnOffX + self.closeSizeW), delayShow: true)
+                default:
+                    self.title = webView.title
+                }
+            }
+        }
+    }
+
+}
+
+// MARK: - Title
+extension JMSWebViewController {
+    
+    fileprivate func jms_setupNavTitle(_ navTitle: String, textColor: UIColor = .white, titleFont: UIFont = UIFont.boldSystemFont(ofSize: 19), offX: CGFloat = 105, delayShow: Bool = false) {
+        let maxWidth        = UIScreen.main.bounds.width - 2 * offX
+        
+        let titleView       = UIView.init(frame: CGRect.init(x: 0, y: 0, width: maxWidth, height: kNavBarHeight))
+        titleView.backgroundColor = .clear
+        
+        let label           = UILabel.init(frame: titleView.bounds)
+        label.text          = navTitle
+        label.font          = titleFont
+        label.textColor     = textColor
+        label.textAlignment = .center
+        label.backgroundColor = .clear
+        label.sizeToFit()
+        
+        var tempCenter        = label.center
+        tempCenter.y          = titleView.center.y
+        label.center          = tempCenter
+        
+        var viewFrame:CGRect  = titleView.frame
+        var labelFrame:CGRect = label.frame
+        if labelFrame.width > maxWidth {
+            labelFrame.size.width = maxWidth
+        }
+        
+        viewFrame.size.width  = labelFrame.width
+        label.frame           = labelFrame
+        titleView.frame       = viewFrame
+        titleView.addSubview(label)
+        
+        if delayShow {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1, execute: {
+                self.navigationItem.titleView = titleView
+            })
+        }else {
+            self.navigationItem.titleView = titleView
         }
     }
     
-    // MARK: - UIGestureRecognizerDelegate
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        let count = self.navigationController?.viewControllers.count ?? 0
-        
-        if count <= 1 {
-            return false
-        }
-        
-        return true
-    }
-
 }
 
 // MARK: - WKScriptMessageHandler
@@ -277,9 +372,36 @@ extension JMSWebViewController: WKScriptMessageHandler {
     
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if self.scriptDidReceiveMsgBlk != nil && self.scriptMsgNames.contains(message.name) {
-            self.scriptDidReceiveMsgBlk!(userContentController, message)
+            self.scriptDidReceiveMsgBlk!(self.webView, userContentController, message)
         }
     }
+    
+    fileprivate func addScriptMsgNames() {
+        for name in self.scriptMsgNames {
+            self.webView.configuration.userContentController.add(self, name: name)
+        }
+    }
+    
+    fileprivate func removeScriptMsgNames() {
+        for name in self.scriptMsgNames {
+            self.webView.configuration.userContentController.removeScriptMessageHandler(forName: name)
+        }
+    }
+    
+}
+
+// MARK: - JMSNavBackButtonHandlerProtocol
+extension JMSWebViewController: JMSNavBackButtonHandlerProtocol {
+    
+    public func navigationShouldPopOnBackButton() -> Bool {
+        if self.webView.canGoBack {
+            self.webView.goBack()
+            return false
+        }
+        
+        return true
+    }
+
     
 }
 
@@ -302,10 +424,12 @@ extension JMSWebViewController: WKNavigationDelegate {
     
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         self.didFailProvisionalNavigation()
+        self.reqErrorBlk?(webView, webView.url?.absoluteString ?? "", error)
     }
     
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         self.didFailNavigation()
+        self.reqErrorBlk?(webView, webView.url?.absoluteString ?? "", error)
     }
     
     public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
@@ -323,6 +447,7 @@ extension JMSWebViewController: WKNavigationDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.3) {
             self.progressView?.isHidden = true
+            self.progressView?.progress = 0
         }
     }
     

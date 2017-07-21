@@ -20,6 +20,7 @@
 		1A32CEBE1E27520A00EB77BB /* JMSWebViewControllerDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A32CEBD1E27520A00EB77BB /* JMSWebViewControllerDemoTests.swift */; };
 		1A32CEC91E27520B00EB77BB /* JMSWebViewControllerDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A32CEC81E27520B00EB77BB /* JMSWebViewControllerDemoUITests.swift */; };
 		1A32CF111E28757300EB77BB /* js_api_test.html in Resources */ = {isa = PBXBuildFile; fileRef = 1A32CF101E28757300EB77BB /* js_api_test.html */; };
+		1FBCA5E85BD3401A0FE9F27E /* Pods_JMSWebViewControllerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E27D50354DFBEFB2DE3ACF62 /* Pods_JMSWebViewControllerDemo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,9 @@
 		1A32CEC81E27520B00EB77BB /* JMSWebViewControllerDemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMSWebViewControllerDemoUITests.swift; sourceTree = "<group>"; };
 		1A32CECA1E27520B00EB77BB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A32CF101E28757300EB77BB /* js_api_test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = js_api_test.html; sourceTree = "<group>"; };
+		A3D35981AD2345843371008B /* Pods-JMSWebViewControllerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JMSWebViewControllerDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-JMSWebViewControllerDemo/Pods-JMSWebViewControllerDemo.release.xcconfig"; sourceTree = "<group>"; };
+		D15D015511606B989F0A2362 /* Pods-JMSWebViewControllerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JMSWebViewControllerDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JMSWebViewControllerDemo/Pods-JMSWebViewControllerDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		E27D50354DFBEFB2DE3ACF62 /* Pods_JMSWebViewControllerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_JMSWebViewControllerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FBCA5E85BD3401A0FE9F27E /* Pods_JMSWebViewControllerDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +123,8 @@
 				1A32CEBC1E27520A00EB77BB /* JMSWebViewControllerDemoTests */,
 				1A32CEC71E27520B00EB77BB /* JMSWebViewControllerDemoUITests */,
 				1A32CEA61E27520A00EB77BB /* Products */,
+				F2927CB7E0AB75D12B1BB0BE /* Pods */,
+				8EE8449A69E6BE71BAEFC7C3 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -164,6 +171,23 @@
 			path = JMSWebViewControllerDemoUITests;
 			sourceTree = "<group>";
 		};
+		8EE8449A69E6BE71BAEFC7C3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E27D50354DFBEFB2DE3ACF62 /* Pods_JMSWebViewControllerDemo.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F2927CB7E0AB75D12B1BB0BE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D15D015511606B989F0A2362 /* Pods-JMSWebViewControllerDemo.debug.xcconfig */,
+				A3D35981AD2345843371008B /* Pods-JMSWebViewControllerDemo.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -171,10 +195,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A32CECD1E27520B00EB77BB /* Build configuration list for PBXNativeTarget "JMSWebViewControllerDemo" */;
 			buildPhases = (
+				3A7A7DD0EC5C56F4EBB12783 /* [CP] Check Pods Manifest.lock */,
 				1A32CEA11E27520A00EB77BB /* Sources */,
 				1A32CEA21E27520A00EB77BB /* Frameworks */,
 				1A32CEA31E27520A00EB77BB /* Resources */,
 				1A073AB21E287EBA002BF9CC /* Embed Frameworks */,
+				6B658A40D1F4C98D0F2349EE /* [CP] Embed Pods Frameworks */,
+				E54B2684E11EFD0926DC8B99 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -298,6 +325,60 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3A7A7DD0EC5C56F4EBB12783 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-JMSWebViewControllerDemo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6B658A40D1F4C98D0F2349EE /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-JMSWebViewControllerDemo/Pods-JMSWebViewControllerDemo-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/JMSNavBackButtonHandler/JMSNavBackButtonHandler.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JMSNavBackButtonHandler.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JMSWebViewControllerDemo/Pods-JMSWebViewControllerDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E54B2684E11EFD0926DC8B99 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JMSWebViewControllerDemo/Pods-JMSWebViewControllerDemo-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1A32CEA11E27520A00EB77BB /* Sources */ = {
@@ -459,6 +540,7 @@
 		};
 		1A32CECE1E27520B00EB77BB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D15D015511606B989F0A2362 /* Pods-JMSWebViewControllerDemo.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -474,6 +556,7 @@
 		};
 		1A32CECF1E27520B00EB77BB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3D35981AD2345843371008B /* Pods-JMSWebViewControllerDemo.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;

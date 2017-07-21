@@ -1,0 +1,6 @@
+framework module JMSNavBackButtonHandler {
+  umbrella header "JMSNavBackButtonHandler-umbrella.h"
+
+  export *
+  module * { export * }
+}
