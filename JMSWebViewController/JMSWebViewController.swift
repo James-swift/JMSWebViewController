@@ -280,21 +280,19 @@ open class JMSWebViewController: UIViewController {
     
     // MARK: - Datas
     private func fillDatas() {
-        if self.reqPath == "" {
-            self.reqErrorBlk?(self.webView,self.reqPath, nil)
-            return
-        }
-        
-        let tempUrl = URL.init(string: self.reqPath)!
-        if tempUrl.host != nil && tempUrl.scheme != nil {
-            self.webView.load(URLRequest.init(url: tempUrl))
-        }else {
-            let tempFileURL = URL.init(fileURLWithPath: self.reqPath)
-            if #available(iOS 9.0, *) {
-                self.webView.loadFileURL(tempFileURL, allowingReadAccessTo: tempFileURL)
-            } else {
-                self.webView.load(URLRequest.init(url: URL.init(fileURLWithPath: self.reqPath)))
+        if let tempUrl = URL.init(string: self.reqPath) {
+            if tempUrl.host != nil && tempUrl.scheme != nil {
+                self.webView.load(URLRequest.init(url: tempUrl))
+            }else {
+                let tempFileURL = URL.init(fileURLWithPath: self.reqPath)
+                if #available(iOS 9.0, *) {
+                    self.webView.loadFileURL(tempFileURL, allowingReadAccessTo: tempFileURL)
+                } else {
+                    self.webView.load(URLRequest.init(url: URL.init(fileURLWithPath: self.reqPath)))
+                }
             }
+        }else {
+            self.reqErrorBlk?(self.webView,self.reqPath, nil)
         }
     }
     

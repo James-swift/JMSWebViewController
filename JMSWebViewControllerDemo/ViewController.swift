@@ -94,6 +94,9 @@ class ViewController: UIViewController {
     func pushVC(btn: UIButton) {
         if btn.tag == 1 {
             let webVC = JMSWebViewController.init(positionAt: .backBarBtnItem(backIconImage: UIImage.init(named: "JMS_Back_Icon"), backTintColor: UIColor.black, closeTitleColor: .black, closeIconColor: .black, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: false, progressTintColor: .black, reqPath: "https://www.baidu.com")
+            webVC.reqErrorBlk = { (webView, reqPath, error) in
+                webVC.navigationController?.popViewController(animated: true)
+            }
             self.navigationController?.pushViewController(webVC, animated: true)
         }else if btn.tag == 2 {
             let path = Bundle.main.path(forResource: "js_api_test.html", ofType: nil)!
