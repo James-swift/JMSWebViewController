@@ -1,12 +1,12 @@
 PODS:
-  - JMSNavBackButtonHandler (1.0.2)
+  - JMSNavBackButtonHandler (2.0.0)
 
 DEPENDENCIES:
-  - JMSNavBackButtonHandler
+  - JMSNavBackButtonHandler (~> 2.0.0)
 
 SPEC CHECKSUMS:
-  JMSNavBackButtonHandler: 8d5569146f5b9805bba15250a07482301b235a30
+  JMSNavBackButtonHandler: 23e33db36d4709d779fba6966d8f054a7d016343
 
-PODFILE CHECKSUM: d633fae8fc0e74cd0c1bc5f4dee84c3af32834c6
+PODFILE CHECKSUM: 9cf5e6242841208ca181a9d5bc388a1ed4589757
 
-COCOAPODS: 1.3.0.beta.2
+COCOAPODS: 1.4.0.beta.2

@@ -91,7 +91,7 @@ class ViewController: UIViewController {
         self.btn4.addTarget(self, action: #selector(pushVC), for: .touchUpInside)
     }
     
-    func pushVC(btn: UIButton) {
+    @objc func pushVC(btn: UIButton) {
         if btn.tag == 1 {
             let webVC = JMSWebViewController.init(positionAt: .backBarBtnItem(backIconImage: UIImage.init(named: "JMS_Back_Icon"), backTintColor: UIColor.black, closeTitleColor: .black, closeIconColor: .black, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: false, progressTintColor: .black, reqPath: "https://www.baidu.com")
             webVC.reqErrorBlk = { (webView, reqPath, error) in
