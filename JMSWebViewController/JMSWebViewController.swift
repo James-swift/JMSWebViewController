@@ -24,19 +24,19 @@ public enum JMSWebViewBackPositionAt {
 
 open class JMSWebViewController: UIViewController {
     
-    public var viewWillAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
-    public var viewDidAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
-    public var viewWillDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
-    public var viewDidDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    open var viewWillAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    open var viewDidAppearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    open var viewWillDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
+    open var viewDidDisappearBlk: ((_ pageId: String, _ webView: WKWebView)->())?
 
     /// 收到消息处理
-    public var scriptDidReceiveMsgBlk: ((_ webView: WKWebView, _ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
+    open var scriptDidReceiveMsgBlk: ((_ webView: WKWebView, _ userContentController: WKUserContentController, _ message: WKScriptMessage) -> ())?
     /// 请求路径错误处理
-    public var reqErrorBlk: ((_ webView: WKWebView, _ reqPath: String, _ error: Error?)->())?
+    open var reqErrorBlk: ((_ webView: WKWebView, _ reqPath: String, _ error: Error?)->())?
     /// 自定义导航栏titleView
-    public var cstNavTitleViewBlk: ((_ webView: WKWebView, _ title: String?)->(UIView?))?
+    open var cstNavTitleViewBlk: ((_ webView: WKWebView, _ title: String?)->(UIView?))?
     /// 给webView添加约束
-    public var addWebViewConstraintsBlk: ((_ webView: WKWebView, _ webSuperView: UIView)->())?
+    open var addWebViewConstraintsBlk: ((_ webView: WKWebView, _ webSuperView: UIView)->())?
 
     fileprivate var reqPath: String                 = ""
     fileprivate var  isNavBarHidden                 = false
@@ -56,7 +56,11 @@ open class JMSWebViewController: UIViewController {
     private      var backSizeW: CGFloat       = 0
     private      var closeSizeW: CGFloat      = 0
     
-    fileprivate lazy var webView: WKWebView = {
+    open var webView: WKWebView {
+        return self.pWebView
+    }
+    
+    fileprivate lazy var pWebView: WKWebView = {
         let tempConfiguration           = WKWebViewConfiguration()
         tempConfiguration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
@@ -297,7 +301,7 @@ open class JMSWebViewController: UIViewController {
     }
     
     // MARK: - Event Response
-    func clickBackBtn() {
+    @objc func clickBackBtn() {
         if self.webView.canGoBack {
             self.webView.goBack()
         }else {
@@ -305,7 +309,7 @@ open class JMSWebViewController: UIViewController {
         }
     }
     
-    func close() {
+    @objc func close() {
         _ = self.navigationController?.popViewController(animated: true)
     }
     
@@ -375,7 +379,7 @@ extension JMSWebViewController {
 // MARK: - WKScriptMessageHandler
 extension JMSWebViewController: WKScriptMessageHandler {
     
-    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    open func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if self.scriptDidReceiveMsgBlk != nil && self.scriptMsgNames.contains(message.name) {
             self.scriptDidReceiveMsgBlk!(self.webView, userContentController, message)
         }
@@ -407,37 +411,36 @@ extension JMSWebViewController: JMSNavBackButtonHandlerProtocol {
         return true
     }
 
-    
 }
 
 // MARK: - WKNavigationDelegate
 extension JMSWebViewController: WKNavigationDelegate {
     
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         self.setupCloseBtn()
         decisionHandler(.allow)
     }
     
-    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+    open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         self.didStartLoad()
     }
     
-    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         self.didFinishLoad()
         self.setupCloseBtn()
     }
     
-    public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    open func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         self.didFailProvisionalNavigation()
         self.reqErrorBlk?(webView, webView.url?.absoluteString ?? "", error)
     }
     
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         self.didFailNavigation()
         self.reqErrorBlk?(webView, webView.url?.absoluteString ?? "", error)
     }
     
-    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+    open func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
         
     }
     
@@ -475,7 +478,7 @@ extension JMSWebViewController: WKNavigationDelegate {
 // MARK: - WKUIDelegate
 extension JMSWebViewController: WKUIDelegate {
     
-    public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         let host = webView.url?.host
         
         let alert = UIAlertController(title: host ?? JMSWebViewUtils.getLocalizedString(key: "messages"), message: message, preferredStyle: .alert)
@@ -488,7 +491,7 @@ extension JMSWebViewController: WKUIDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         let host = webView.url?.host
         
         let alert = UIAlertController(title: host ?? JMSWebViewUtils.getLocalizedString(key: "messages"), message: message, preferredStyle: .alert)
@@ -503,7 +506,7 @@ extension JMSWebViewController: WKUIDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         let host = webView.url?.host
         
         let alert = UIAlertController(title: prompt, message: host ?? defaultText, preferredStyle: .alert)

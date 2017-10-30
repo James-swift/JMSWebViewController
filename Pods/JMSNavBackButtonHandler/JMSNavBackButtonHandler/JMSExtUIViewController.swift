@@ -22,10 +22,10 @@ extension UIViewController {
     
     weak open var backDelegate: JMSNavBackButtonHandlerProtocol? {
         set {
-            objc_setAssociatedObject(self, UIViewController.RuntimeKey.jm_backButtonHandlerKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, UIViewController.RuntimeKey.jm_backButtonHandlerKey!, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
         get {
-            return objc_getAssociatedObject(self, UIViewController.RuntimeKey.jm_backButtonHandlerKey) as? JMSNavBackButtonHandlerProtocol
+            return objc_getAssociatedObject(self, UIViewController.RuntimeKey.jm_backButtonHandlerKey!) as? JMSNavBackButtonHandlerProtocol
         }
     }
     
