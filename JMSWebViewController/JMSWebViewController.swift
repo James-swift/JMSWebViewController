@@ -13,9 +13,9 @@ import JMSNavBackButtonHandler
 private let kWebViewEstimatedProgress           =  "estimatedProgress"
 private let kWebViewTitle                       =  "title"
 
-private let kStatusBarHeight: CGFloat           = 20.0
+private let kStatusBarHeight: CGFloat           = UIApplication.shared.statusBarFrame.height
 private let kNavBarHeight: CGFloat              = 44.0
-private let kStatusAndNavBarHeight: CGFloat     = 64.0
+private let kStatusAndNavBarHeight: CGFloat     = kStatusBarHeight + kNavBarHeight
 
 public enum JMSWebViewBackPositionAt {
     case backBarBtnItem(backIconImage: UIImage?, backTintColor: UIColor?, closeTitleColor: UIColor, closeIconColor: UIColor?, navTitleFont: UIFont, navTitleColor: UIColor)      /// 返回按钮添加到导航栏backBarButtonItem（默认）
