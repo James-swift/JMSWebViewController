@@ -18,8 +18,10 @@ private let kNavBarHeight: CGFloat              = 44.0
 private let kStatusAndNavBarHeight: CGFloat     = kStatusBarHeight + kNavBarHeight
 
 public enum JMSWebViewBackPositionAt {
-    case backBarBtnItem(backIconImage: UIImage?, backTintColor: UIColor?, closeTitleColor: UIColor, closeIconColor: UIColor?, navTitleFont: UIFont, navTitleColor: UIColor)      /// 返回按钮添加到导航栏backBarButtonItem（默认）
-    case leftBarBtnItem(backTintColor: UIColor, closeTitleColor: UIColor, closeIconColor: UIColor?)      /// 返回按钮添加到导航栏leftBarButtonItem
+    /// 返回按钮添加到导航栏backBarButtonItem（默认）
+    case backBarBtnItem(backIconImage: UIImage?, backTintColor: UIColor?, closeTitleColor: UIColor, closeIconColor: UIColor?, navTitleFont: UIFont, navTitleColor: UIColor)
+    /// 返回按钮添加到导航栏leftBarButtonItem
+    case leftBarBtnItem(backTintColor: UIColor, closeTitleColor: UIColor, closeIconColor: UIColor?)
 }
 
 open class JMSWebViewController: UIViewController {
@@ -41,7 +43,7 @@ open class JMSWebViewController: UIViewController {
     fileprivate var reqPath: String                 = ""
     fileprivate var  isNavBarHidden                 = false
     fileprivate var scriptMsgNames: Array<String>   = []
-    fileprivate var positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: .clear, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black)
+    fileprivate var positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: nil, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black)
 
     /// 唯一标识
     private(set) var pageId: String           = ""
@@ -152,7 +154,7 @@ open class JMSWebViewController: UIViewController {
     ///     - progressTintColor: ProgressView的tintColor属性设置
     ///     - reqPath:           请求路径
     ///     - scriptMsgNames:    消息处理数组
-    public init(positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: .clear, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: Bool = false, pageId: String = "", progressTintColor: UIColor = .clear, reqPath: String, scriptMsgNames: Array<String> = []) {
+    public init(positionAt: JMSWebViewBackPositionAt = .backBarBtnItem(backIconImage: nil, backTintColor: nil, closeTitleColor: .black, closeIconColor: nil, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: Bool = false, pageId: String = "", progressTintColor: UIColor = .clear, reqPath: String, scriptMsgNames: Array<String> = []) {
         self.pageId             = pageId
         self.reqPath            = reqPath
         self.isNavBarHidden     = isNavBarHidden
@@ -162,7 +164,7 @@ open class JMSWebViewController: UIViewController {
         
         switch positionAt {
         case .backBarBtnItem( _, _, _, let closeIconColor, _, _):
-            if closeIconColor == nil || closeIconColor == .clear {
+            if closeIconColor == nil {
                 self.backSizeW          = 50
                 self.closeSizeW         = 50
                 self.closeBtnOffX       = self.backSizeW + 10
@@ -176,7 +178,7 @@ open class JMSWebViewController: UIViewController {
                 self.closeBtnOffX       = self.backSizeW + 2
             }
         case .leftBarBtnItem( _, _, let closeIconColor):
-            if closeIconColor == nil || closeIconColor == .clear {
+            if closeIconColor == nil {
                 self.backSizeW          = 50
                 self.closeSizeW         = 50
                 self.closeBtnOffX       = self.backSizeW
