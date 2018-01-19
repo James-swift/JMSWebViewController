@@ -16,9 +16,10 @@ extension UINavigationController: UINavigationBarDelegate {
             return true
         }
 
-        if (self.topViewController?.backDelegate?.navigationShouldPopOnBackButton() ?? true) {
+        let topVC        = self.topViewController
+        if (topVC?.backDelegate?.navigationShouldPopOnBackButton() ?? true) {
             DispatchQueue.main.async {
-                self.topViewController?.backDelegate = nil
+                topVC?.backDelegate = nil
                 self.popViewController(animated: true)
             }
         }else {

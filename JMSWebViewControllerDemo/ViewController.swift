@@ -103,7 +103,7 @@ class ViewController: UIViewController {
         }else if btn.tag == 2 {
             let path = Bundle.main.path(forResource: "js_api_test.html", ofType: nil)!
 
-            let webVC = JMSWebViewController.init(positionAt: .backBarBtnItem(backIconImage: UIImage.init(named: "JMS_Back_Icon"), backTintColor: UIColor.black, closeTitleColor: .black, closeIconColor: nil, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: false, progressTintColor: .black, reqPath: path, scriptMsgNames: ["testApp"])
+            let webVC = JMSWebViewController.init(positionAt: .backBarBtnItem(backIconImage: UIImage.init(named: "JMS_Back_Icon"), backTintColor: UIColor.black, closeTitleColor: .clear, closeIconColor: nil, navTitleFont: UIFont.boldSystemFont(ofSize: 19), navTitleColor: .black), isNavBarHidden: false, progressTintColor: .black, reqPath: path, scriptMsgNames: ["testApp"])
 
             webVC.scriptDidReceiveMsgBlk = { [weak self] (webView, userContentController, message) in
                 let dict = message.body as? Dictionary<String, Any>
